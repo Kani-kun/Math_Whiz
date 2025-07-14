@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Whiz! All Operations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; touch-action: manipulation; }
+        .font-brand { font-family: 'Fredoka One', cursive; }
+        .feedback-correct { color: #22c55e; animation: fadeIn 0.5s ease-in-out; }
+        .feedback-incorrect { color: #ef4444; animation: shake 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .option-btn { transition: all 0.2s ease-in-out; }
+        .option-btn:hover:not(:disabled) { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .option-btn.correct { background-color: #22c55e !important; color: white !important; border-color: #16a34a !important; }
+        .option-btn.incorrect { background-color: #ef4444 !important; color: white !important; border-color: #dc2626 !important; opacity: 0.7; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; padding: 1rem; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { background: white; padding: 1.5rem; border-radius: 1rem; width: 100%; max-width: 600px; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .tab-btn { transition: all 0.2s ease-in-out; }
+        .tab-btn.active { background-color: #3b82f6; color: white; }
+        .tab-btn:not(.active) { background-color: #e5e7eb; color: #4b5563; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Hard Mode Toggle Styles */
+        .toggle-checkbox:checked { right: 0; border-color: #4f46e5; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #4f46e5; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-8 border-t-8 border-blue-500">
+
+        <!-- Page: Home Menu -->
+        <div id="home-page" class="page active">
+            <header class="text-center mb-6">
+                <h1 class="font-brand text-5xl text-blue-600">Math Whiz!</h1>
+                <p class="text-gray-500 mt-2">Choose your challenge</p>
+            </header>
+            
+            <div class="flex justify-center rounded-lg bg-gray-200 p-1 mb-6">
+                <button id="tab-add-subtract" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('add-subtract')">Addition & Subtraction</button>
+                <button id="tab-multiply-divide" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('multiply-divide')">Multiplication & Division</button>
+            </div>
+            
+            <div id="content-add-subtract" class="tab-content">
+                <div class="flex flex-col space-y-4">
+                    <button onclick="startPractice('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button onclick="startTest('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 border-b-4 border-purple-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                </div>
+            </div>
+            <div id="content-multiply-divide" class="tab-content">
+                <div class="flex flex-col space-y-4">
+                    <button onclick="startPractice('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-emerald-500 rounded-lg shadow-md hover:bg-emerald-600 border-b-4 border-emerald-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button onclick="startTest('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-rose-500 rounded-lg shadow-md hover:bg-rose-600 border-b-4 border-rose-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                </div>
+            </div>
+
+            <!-- Hard Mode Toggle -->
+            <div class="flex items-center justify-center mt-8">
+                <label for="hard-mode-toggle" class="mr-4 font-semibold text-gray-700">Hard Mode</label>
+                <div class="relative inline-block w-12 align-middle select-none transition duration-200 ease-in">
+                    <input type="checkbox" name="hard-mode-toggle" id="hard-mode-toggle" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                    <label for="hard-mode-toggle" class="toggle-label block overflow-hidden h-7 rounded-full bg-gray-300 cursor-pointer"></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Page: Game (Practice & Test) -->
+        <div id="game-page" class="page">
+            <header class="mb-4 text-center">
+                <h1 id="game-title" class="font-brand text-4xl"></h1>
+                <div id="game-info-bar" class="flex justify-between items-center rounded-lg p-2 mt-4">
+                    <div id="game-score-container">Score: <span id="game-score" class="font-bold text-xl ml-1">0</span></div>
+                    <div id="game-question-container">Question: <span id="game-question-count" class="font-bold"></span></div>
+                    <div id="game-timer-container">Time: <span id="game-timer" class="font-bold">0s</span></div>
+                </div>
+            </header>
+            <main>
+                <div class="my-8"><p class="text-5xl font-bold text-gray-800 text-center" id="game-problem"></p></div>
+                <div id="game-options-container" class="grid grid-cols-2 gap-4 mb-4"></div>
+                <div class="h-10 mt-4 text-center"><p id="game-feedback" class="text-2xl font-semibold"></p></div>
+                <div id="game-next-button-container" class="h-14 mt-2"></div>
+            </main>
+            <footer class="mt-6 text-center">
+                <button onclick="showPage('home-page')" class="text-gray-500 hover:text-blue-600 font-semibold">&larr; Back to Menu</button>
+            </footer>
+        </div>
+
+        <!-- Page: Test Results -->
+        <div id="results-page" class="page">
+             <header class="text-center mb-6">
+                <h1 class="font-brand text-4xl text-green-600">Test Complete!</h1>
+                <p class="text-gray-500">Here are your results:</p>
+            </header>
+            <div class="bg-green-50 rounded-lg p-6 space-y-4 text-lg">
+                <div class="flex justify-between items-center"><span class="font-semibold text-green-800">✅ Accuracy:</span><span id="results-accuracy" class="font-bold text-2xl text-green-700"></span></div>
+                <div class="flex justify-between items-center"><span class="font-semibold text-green-800">⏱️ Time Taken:</span><span id="results-time" class="font-bold text-2xl text-green-700"></span></div>
+                <div class="flex justify-between items-center"><span class="font-semibold text-green-800">🎯 Correct Answers:</span><span id="results-score" class="font-bold text-2xl text-green-700"></span></div>
+            </div>
+            <div class="mt-8 flex flex-col space-y-4">
+                <button id="results-retry-btn" class="w-full p-4 text-xl font-bold text-white rounded-lg shadow-md border-b-4 transition-transform hover:scale-105">Try Again</button>
+                <button onclick="showPage('home-page')" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visual Explanation Modal -->
+    <div id="visual-modal" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Let's break it down!</h2>
+            <p id="modal-problem-text" class="text-2xl md:text-3xl font-bold text-gray-700 mb-2"></p>
+            <p id="modal-explanation-text" class="text-gray-600 mb-4"></p>
+            <div class="bg-gray-50 rounded-lg p-2">
+                <canvas id="visual-canvas" width="550" height="350"></canvas>
+            </div>
+            <button id="modal-close-btn" class="mt-6 w-full px-6 py-3 text-lg font-semibold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700">Got it!</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const pages = document.querySelectorAll('.page');
+        const gameTitle = document.getElementById('game-title'), gameInfoBar = document.getElementById('game-info-bar'), gameScoreContainer = document.getElementById('game-score-container'), gameScore = document.getElementById('game-score'), gameQuestionContainer = document.getElementById('game-question-container'), gameQuestionCount = document.getElementById('game-question-count'), gameTimerContainer = document.getElementById('game-timer-container'), gameTimer = document.getElementById('game-timer'), gameProblem = document.getElementById('game-problem'), gameOptionsContainer = document.getElementById('game-options-container'), gameFeedback = document.getElementById('game-feedback'), gameNextBtnContainer = document.getElementById('game-next-button-container');
+        const resultsAccuracy = document.getElementById('results-accuracy'), resultsTime = document.getElementById('results-time'), resultsScore = document.getElementById('results-score'), resultsRetryBtn = document.getElementById('results-retry-btn');
+        const visualModal = document.getElementById('visual-modal'), modalProblemText = document.getElementById('modal-problem-text'), modalExplanationText = document.getElementById('modal-explanation-text'), visualCanvas = document.getElementById('visual-canvas'), modalCloseBtn = document.getElementById('modal-close-btn');
+        const hardModeToggle = document.getElementById('hard-mode-toggle');
+
+        // --- Game State ---
+        let state = {};
+        let isHardMode = false;
+        const TOTAL_TEST_QUESTIONS = 20;
+
+        // --- Core Logic ---
+        function showPage(pageId) { pages.forEach(p => p.classList.toggle('active', p.id === pageId)); }
+        function switchGameMode(mode) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            document.getElementById(`content-${mode}`).classList.add('active');
+        }
+
+        function generateProblem(gameMode) {
+            let num1, num2, answer, type, text;
+            if (gameMode === 'add-subtract') {
+                if (Math.random() > 0.5) { // Addition
+                    do { num1 = Math.floor(Math.random() * 11); num2 = Math.floor(Math.random() * 11); } while (num1 + num2 > 10);
+                    answer = num1 + num2; type = 'add'; text = `${num1} + ${num2} = ?`;
+                } else { // Subtraction
+                    num1 = Math.floor(Math.random() * 11); num2 = Math.floor(Math.random() * (num1 + 1));
+                    answer = num1 - num2; type = 'subtract'; text = `${num1} - ${num2} = ?`;
+                }
+            } else { // multiply-divide
+                if (Math.random() > 0.5) { // Multiplication
+                    num1 = Math.floor(Math.random() * 10) + 1; num2 = Math.floor(Math.random() * 10) + 1;
+                    answer = num1 * num2; type = 'multiply'; text = `${num1} × ${num2} = ?`;
+                } else { // Division
+                    num2 = Math.floor(Math.random() * 10) + 1; answer = Math.floor(Math.random() * 10) + 1;
+                    num1 = num2 * answer;
+                    type = 'divide'; text = `${num1} ÷ ${num2} = ?`;
+                }
+            }
+            return { text, answer, type, nums: [num1, num2] };
+        }
+
+        function generateOptions(problem) {
+            const { answer, gameMode, nums } = problem;
+            if (isHardMode) {
+                return generateHardOptions(answer, gameMode, nums);
+            } else {
+                return generateEasyOptions(answer, gameMode);
+            }
+        }
+
+        function generateEasyOptions(correctAnswer, gameMode) {
+            let options = [correctAnswer];
+            const maxVal = gameMode === 'add-subtract' ? 20 : 100;
+            while (options.length < 4) {
+                let wrong = Math.floor(Math.random() * (maxVal + 1));
+                if (!options.includes(wrong)) {
+                    options.push(wrong);
+                }
+            }
+            return options.sort(() => Math.random() - 0.5);
+        }
+
+        function generateHardOptions(correctAnswer, gameMode, nums) {
+            let plausibleOptions = new Set();
+            // Generate plausible wrong answers based on common mistakes
+            plausibleOptions.add(correctAnswer - 1);
+            plausibleOptions.add(correctAnswer + 1);
+            plausibleOptions.add(correctAnswer - 2);
+            plausibleOptions.add(correctAnswer + 2);
+            
+            if (gameMode === 'multiply-divide' && nums) {
+                const [num1, num2] = nums;
+                plausibleOptions.add((num1 - 1) * num2);
+                plausibleOptions.add((num1 + 1) * num2);
+                plausibleOptions.add(num1 * (num2 - 1));
+                plausibleOptions.add(num1 * (num2 + 1));
+                plausibleOptions.add(correctAnswer + num1);
+                plausibleOptions.add(correctAnswer - num1);
+            }
+
+            // Filter out the correct answer and any negative numbers
+            plausibleOptions.delete(correctAnswer);
+            let finalOptions = Array.from(plausibleOptions).filter(n => n >= 0);
+            
+            // Shuffle and pick the best 3
+            finalOptions.sort(() => Math.random() - 0.5);
+            let wrongOptions = finalOptions.slice(0, 3);
+
+            // If not enough plausible options, fill with random-but-close numbers
+            while (wrongOptions.length < 3) {
+                const randomOffset = Math.floor(Math.random() * 5) + 1; // 1-5
+                const randomWrong = correctAnswer + (Math.random() > 0.5 ? randomOffset : -randomOffset);
+                if (randomWrong >= 0 && !wrongOptions.includes(randomWrong) && randomWrong !== correctAnswer) {
+                    wrongOptions.push(randomWrong);
+                }
+            }
+            
+            let allOptions = [correctAnswer, ...wrongOptions];
+            return allOptions.sort(() => Math.random() - 0.5);
+        }
+
+        function setupUI(mode, type) {
+            const isPractice = type === 'practice';
+            const isAddSub = mode === 'add-subtract';
+            
+            gameTitle.textContent = `${isAddSub ? 'Add/Subtract' : 'Multiply/Divide'} ${isPractice ? 'Practice' : 'Test'}`;
+            gameTitle.className = `font-brand text-4xl ${isAddSub ? 'text-blue-600' : 'text-emerald-600'}`;
+            gameInfoBar.className = `flex justify-between items-center rounded-lg p-2 mt-4 ${isAddSub ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}`;
+            
+            gameScoreContainer.style.display = isPractice ? 'block' : 'none';
+            gameQuestionContainer.style.display = isPractice ? 'none' : 'block';
+            gameTimerContainer.style.display = isPractice ? 'none' : 'block';
+        }
+
+        // --- Game Flow ---
+        function startPractice(gameMode) {
+            state = { gameMode, type: 'practice', score: 0, answered: false };
+            setupUI(gameMode, 'practice');
+            gameScore.textContent = '0';
+            showPage('game-page');
+            displayNewProblem();
+        }
+
+        function startTest(gameMode) {
+            state = { gameMode, type: 'test', questions: Array.from({ length: TOTAL_TEST_QUESTIONS }, () => generateProblem(gameMode)), currentQuestionIndex: 0, correctAnswers: 0, timerInterval: null };
+            setupUI(gameMode, 'test');
+            state.startTime = Date.now();
+            state.timerInterval = setInterval(updateTimer, 1000);
+            showPage('game-page');
+            displayNewProblem();
+        }
+
+        function displayNewProblem() {
+            state.answered = false;
+            const isPractice = state.type === 'practice';
+            let problem = isPractice ? generateProblem(state.gameMode) : state.questions[state.currentQuestionIndex];
+            problem.gameMode = state.gameMode; // Add gameMode to problem for option generation
+            state.currentProblem = problem;
+            
+            const options = generateOptions(state.currentProblem);
+
+            gameProblem.textContent = problem.text;
+            if (!isPractice) gameQuestionCount.textContent = `${state.currentQuestionIndex + 1}/${TOTAL_TEST_QUESTIONS}`;
+            
+            gameOptionsContainer.innerHTML = '';
+            options.forEach(o => gameOptionsContainer.appendChild(createOptionButton(o, () => checkAnswer(o))));
+            
+            gameFeedback.textContent = '';
+            gameNextBtnContainer.innerHTML = '';
+        }
+
+        function checkAnswer(selectedAnswer) {
+            if (state.answered) return;
+            state.answered = true;
+            const isCorrect = selectedAnswer === state.currentProblem.answer;
+
+            if (state.type === 'practice') {
+                Array.from(gameOptionsContainer.children).forEach(btn => {
+                    btn.disabled = true;
+                    if (parseInt(btn.textContent) === state.currentProblem.answer) btn.classList.add('correct');
+                    else btn.classList.add('incorrect');
+                });
+                if (isCorrect) {
+                    state.score++;
+                    gameScore.textContent = state.score;
+                    gameFeedback.textContent = 'Correct! 🎉';
+                    gameFeedback.className = 'feedback-correct';
+                    createNextButton();
+                } else {
+                    gameFeedback.textContent = 'Let\'s see...';
+                    gameFeedback.className = 'feedback-incorrect';
+                    setTimeout(() => showVisualExplanation(state.currentProblem), 500);
+                }
+            } else { // Test mode
+                if (isCorrect) state.correctAnswers++;
+                state.currentQuestionIndex++;
+                if (state.currentQuestionIndex >= TOTAL_TEST_QUESTIONS) endTest();
+                else displayNewProblem();
+            }
+        }
+
+        function endTest() {
+            clearInterval(state.timerInterval);
+            const timeTaken = Math.floor((Date.now() - state.startTime) / 1000);
+            const accuracy = (state.correctAnswers / TOTAL_TEST_QUESTIONS) * 100;
+            resultsAccuracy.textContent = `${accuracy.toFixed(0)}%`;
+            resultsTime.textContent = `${timeTaken} seconds`;
+            resultsScore.textContent = `${state.correctAnswers} / ${TOTAL_TEST_QUESTIONS}`;
+            
+            const isAddSub = state.gameMode === 'add-subtract';
+            resultsRetryBtn.className = `w-full p-4 text-xl font-bold text-white rounded-lg shadow-md border-b-4 transition-transform hover:scale-105 ${isAddSub ? 'bg-purple-500 hover:bg-purple-600 border-purple-700' : 'bg-rose-500 hover:bg-rose-600 border-rose-700'}`;
+            resultsRetryBtn.onclick = () => startTest(state.gameMode);
+            
+            showPage('results-page');
+        }
+
+        function createNextButton() {
+            const btn = document.createElement('button');
+            btn.textContent = 'Next Question →';
+            btn.className = 'w-full md:w-auto px-6 py-3 text-lg font-semibold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 border-b-4 border-green-700 transition-all duration-200';
+            btn.onclick = displayNewProblem;
+            gameNextBtnContainer.innerHTML = '';
+            gameNextBtnContainer.appendChild(btn);
+        }
+        
+        function updateTimer() { gameTimer.textContent = `${Math.floor((Date.now() - state.startTime) / 1000)}s`; }
+        
+        function createOptionButton(text, onClickHandler) {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.classList.add('option-btn', 'w-full', 'p-4', 'text-2xl', 'font-bold', 'text-white', 'bg-indigo-500', 'rounded-lg', 'shadow-md', 'hover:bg-indigo-600', 'border-b-4', 'border-indigo-700');
+            btn.onclick = onClickHandler;
+            return btn;
+        }
+
+        // --- Visual Explanation ---
+        function showVisualExplanation(problem) {
+            modalProblemText.textContent = problem.text.replace('?', problem.answer);
+            drawProblemOnCanvas(problem);
+            visualModal.classList.add('visible');
+        }
+        function hideVisualExplanation() {
+            visualModal.classList.remove('visible');
+            createNextButton();
+        }
+        function drawProblemOnCanvas(problem) {
+            const ctx = visualCanvas.getContext('2d');
+            const canvasWidth = visualCanvas.width;
+            const canvasHeight = visualCanvas.height;
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+            
+            const [num1, num2] = problem.nums;
+            modalExplanationText.textContent = ''; 
+
+            if (problem.type === 'add' || problem.type === 'subtract') {
+                const radius = 12;
+                const y = canvasHeight / 2;
+                if (problem.type === 'add') {
+                    drawDotsInLine(ctx, num1, 20, y, '#3b82f6', radius);
+                    ctx.font = '24px Fredoka One';
+                    ctx.fillStyle = '#4b5563';
+                    ctx.fillText('+', num1 * (radius * 2 + 10) + 25, y + radius/2);
+                    drawDotsInLine(ctx, num2, num1 * (radius * 2 + 10) + 55, y, '#f97316', radius);
+                } else {
+                    drawDotsInLine(ctx, num1, 20, y, '#3b82f6', radius);
+                    crossOutDots(ctx, num2, 20, y, '#ef4444', radius);
+                }
+            } else if (problem.type === 'multiply') {
+                modalExplanationText.textContent = `This shows ${num1} groups of ${num2}.`;
+                const rows = num1;
+                const cols = num2;
+                const padding = 20;
+                const availableWidth = canvasWidth - 2 * padding;
+                const availableHeight = canvasHeight - 2 * padding;
+                const cellWidth = availableWidth / cols;
+                const cellHeight = availableHeight / rows;
+                const radius = Math.min(cellWidth, cellHeight) / 2 * 0.7;
+
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        const x = padding + j * cellWidth + cellWidth / 2;
+                        const y = padding + i * cellHeight + cellHeight / 2;
+                        ctx.fillStyle = `hsl(${(i * 360 / rows)}, 60%, 50%)`;
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            } else if (problem.type === 'divide') {
+                const total = num1;
+                const groupSize = num2;
+                const numGroups = problem.answer;
+                modalExplanationText.textContent = `Start with ${total} dots, then make groups of ${groupSize}. You can make ${numGroups} groups.`;
+
+                const rows = numGroups;
+                const cols = groupSize;
+                const padding = 20;
+                const availableWidth = canvasWidth - 2 * padding;
+                const availableHeight = canvasHeight - 2 * padding;
+                const cellWidth = availableWidth / cols;
+                const cellHeight = availableHeight / rows;
+                const radius = Math.min(cellWidth, cellHeight) / 2 * 0.7;
+
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        const x = padding + j * cellWidth + cellWidth / 2;
+                        const y = padding + i * cellHeight + cellHeight / 2;
+                        ctx.fillStyle = '#4b5563';
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+                for (let i = 0; i < rows; i++) {
+                    ctx.strokeStyle = `hsl(${(i * 360 / rows)}, 70%, 50%)`;
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([5, 5]);
+                    const rectY = padding + i * cellHeight;
+                    ctx.strokeRect(padding / 2, rectY, availableWidth + padding, cellHeight);
+                }
+                 ctx.setLineDash([]);
+            }
+        }
+
+        function drawDotsInLine(ctx, count, startX, y, color, radius) {
+            ctx.fillStyle = color;
+            for (let i = 0; i < count; i++) {
+                ctx.beginPath();
+                ctx.arc(startX + i * (radius * 2 + 10) + radius, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function crossOutDots(ctx, count, startX, y, color, radius) {
+            for (let i = 0; i < count; i++) {
+                const x = startX + i * (radius * 2 + 10) + radius;
+                ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.beginPath();
+                ctx.moveTo(x - radius, y - radius); ctx.lineTo(x + radius, y + radius);
+                ctx.moveTo(x + radius, y - radius); ctx.lineTo(x - radius, y + radius);
+                ctx.stroke();
+            }
+        }
+
+        // --- Initial Load ---
+        window.onload = () => {
+            switchGameMode('add-subtract');
+            showPage('home-page');
+            hardModeToggle.addEventListener('change', (e) => {
+                isHardMode = e.target.checked;
+            });
+            modalCloseBtn.onclick = hideVisualExplanation;
+            visualModal.onclick = (e) => { if (e.target === visualModal) hideVisualExplanation(); };
+        };
+    </script>
+</body>
+</html>
