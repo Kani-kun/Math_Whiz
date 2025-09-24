@@ -121,6 +121,7 @@
             </header>
             <div id="flappy-game-container" class="relative w-full h-96 bg-cyan-400 overflow-hidden rounded-lg shadow-lg border-4 border-gray-700">
                 <canvas id="reward-game-canvas"></canvas>
+                <div id="flappy-lives" class="absolute top-4 left-4 text-white text-3xl font-bold" style="text-shadow: 2px 2px 4px #000;"></div>
                 <div id="flappy-score" class="absolute top-4 right-4 text-white text-3xl font-bold" style="text-shadow: 2px 2px 4px #000;">0</div>
                 <div id="flappy-start-message" class="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold text-center p-4" style="background-color: rgba(0,0,0,0.5); text-shadow: 2px 2px 4px #000;">Click to Start!</div>
             </div>
@@ -154,6 +155,7 @@
         const rewardGameCanvas = document.getElementById('reward-game-canvas');
         const flappyGameContainer = document.getElementById('flappy-game-container');
         const flappyScoreDisplay = document.getElementById('flappy-score');
+        const flappyLivesDisplay = document.getElementById('flappy-lives');
         const flappyStartMessage = document.getElementById('flappy-start-message');
 
         // --- Game State ---
@@ -487,7 +489,7 @@
         }
 
         // --- Flappy Reward Game ---
-        let bird, pipes, flappyScore, gravity, lift, gameLoop, gameActive, frameCount;
+        let bird, pipes, flappyScore, flappyLives, gravity, lift, gameLoop, gameActive, frameCount;
 
         function setupFlappyGame() {
             const canvas = rewardGameCanvas;
@@ -506,12 +508,14 @@
 
             pipes = [];
             flappyScore = 0;
+            flappyLives = 3;
             gravity = 0.4;
             lift = -8;
             gameActive = false;
             frameCount = 0;
 
             flappyScoreDisplay.textContent = flappyScore;
+            flappyLivesDisplay.textContent = `❤️❤️❤️`;
             flappyStartMessage.innerHTML = 'Click to Start!';
             flappyStartMessage.style.display = 'flex';
 
@@ -540,7 +544,7 @@
 
             // Collision detection (canvas bounds)
             if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
-                endFlappyGame();
+                handleCollision();
                 return;
             }
 
@@ -576,7 +580,7 @@
             });
 
             if (collision) {
-                endFlappyGame();
+                handleCollision();
                 return;
             }
 
@@ -587,6 +591,39 @@
             if (gameActive) {
                 frameCount++;
                 gameLoop = requestAnimationFrame(runFlappyGame);
+            }
+        }
+
+        function handleCollision() {
+            gameActive = false; // Pause the game
+            cancelAnimationFrame(gameLoop);
+
+            flappyLives--;
+
+            const hearts = Array(flappyLives).fill('❤️').join('');
+            flappyLivesDisplay.textContent = hearts;
+
+            if (flappyLives <= 0) {
+                endFlappyGame();
+            } else {
+                // Reset bird and show a message
+                bird.y = rewardGameCanvas.height / 2;
+                bird.velocity = 0;
+                drawFlappy(rewardGameCanvas.getContext('2d'), rewardGameCanvas); // Redraw to show reset bird
+
+                flappyStartMessage.innerHTML = `${flappyLives} ${flappyLives > 1 ? 'lives' : 'life'} left!<br><small>Click to continue</small>`;
+                flappyStartMessage.style.display = 'flex';
+
+                // Allow player to click to resume
+                const continueHandler = () => {
+                    if (!gameActive) {
+                       gameActive = true;
+                       flappyStartMessage.style.display = 'none';
+                       gameLoop = requestAnimationFrame(runFlappyGame);
+                       flappyGameContainer.removeEventListener('click', continueHandler);
+                    }
+                };
+                flappyGameContainer.addEventListener('click', continueHandler, { once: true });
             }
         }
 
@@ -618,8 +655,6 @@
         }
 
         function endFlappyGame() {
-            gameActive = false;
-            cancelAnimationFrame(gameLoop);
             state.rewardPlayed = true;
 
             flappyStartMessage.innerHTML = `Game Over!<br>Score: ${flappyScore}<br><small>Click to go back</small>`;
