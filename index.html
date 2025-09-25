@@ -45,20 +45,20 @@
             </header>
             
             <div class="flex justify-center rounded-lg bg-gray-200 p-1 mb-6">
-                <button id="tab-add-subtract" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('add-subtract')">Addition & Subtraction</button>
-                <button id="tab-multiply-divide" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('multiply-divide')">Multiplication & Division</button>
+                <button id="tab-add-subtract" class="tab-btn w-1/2 p-2 rounded-md font-semibold">Addition & Subtraction</button>
+                <button id="tab-multiply-divide" class="tab-btn w-1/2 p-2 rounded-md font-semibold">Multiplication & Division</button>
             </div>
             
             <div id="content-add-subtract" class="tab-content">
                 <div class="flex flex-col space-y-4">
-                    <button onclick="startPractice('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
-                    <button onclick="startTest('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 border-b-4 border-purple-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                    <button id="start-practice-add-subtract" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button id="start-test-add-subtract" class="w-full p-4 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 border-b-4 border-purple-700 transition-transform hover:scale-105">🏆 Timed Test</button>
                 </div>
             </div>
             <div id="content-multiply-divide" class="tab-content">
                 <div class="flex flex-col space-y-4">
-                    <button onclick="startPractice('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-emerald-500 rounded-lg shadow-md hover:bg-emerald-600 border-b-4 border-emerald-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
-                    <button onclick="startTest('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-rose-500 rounded-lg shadow-md hover:bg-rose-600 border-b-4 border-rose-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                    <button id="start-practice-multiply-divide" class="w-full p-4 text-xl font-bold text-white bg-emerald-500 rounded-lg shadow-md hover:bg-emerald-600 border-b-4 border-emerald-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button id="start-test-multiply-divide" class="w-full p-4 text-xl font-bold text-white bg-rose-500 rounded-lg shadow-md hover:bg-rose-600 border-b-4 border-rose-700 transition-transform hover:scale-105">🏆 Timed Test</button>
                 </div>
             </div>
 
@@ -1056,16 +1056,29 @@
         }
 
         // --- Initial Load ---
-        document.addEventListener('DOMContentLoaded', () => {
+        window.onload = () => {
             switchGameMode('add-subtract');
             showPage('home-page');
+
+            // Home page event listeners
+            document.getElementById('tab-add-subtract').addEventListener('click', () => switchGameMode('add-subtract'));
+            document.getElementById('tab-multiply-divide').addEventListener('click', () => switchGameMode('multiply-divide'));
+            document.getElementById('start-practice-add-subtract').addEventListener('click', () => startPractice('add-subtract'));
+            document.getElementById('start-test-add-subtract').addEventListener('click', () => startTest('add-subtract'));
+            document.getElementById('start-practice-multiply-divide').addEventListener('click', () => startPractice('multiply-divide'));
+            document.getElementById('start-test-multiply-divide').addEventListener('click', () => startTest('multiply-divide'));
+
             hardModeToggle.addEventListener('change', (e) => {
                 isHardMode = e.target.checked;
             });
+
+            // Modal listeners
             modalCloseBtn.onclick = hideVisualExplanation;
             visualModal.onclick = (e) => { if (e.target === visualModal) hideVisualExplanation(); };
+
+            // Reward listeners
             rewardGameBtn.onclick = () => showPage('reward-menu-page');
-        });
+        };
     </script>
 </body>
 </html>

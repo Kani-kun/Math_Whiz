@@ -9,18 +9,17 @@ async def main():
         # --- Test 1: Main menu button functionality ---
         await page.goto("file:///app/index.html")
 
-        try:
-            # Click the "Timed Test" button for multiply/divide
-            await page.click("#content-multiply-divide button:has-text('Timed Test')")
+        # Wait for the initial content to be visible
+        await expect(page.locator("#content-add-subtract")).to_be_visible()
 
-            # Wait for the game page to be visible
-            await expect(page.locator("#game-page")).to_be_visible()
-            await expect(page.locator("#game-title")).to_have_text("Multiply/Divide Test")
+        # Click the "Multiply/Divide" tab and verify its content appears.
+        await page.click("#tab-multiply-divide")
+        await expect(page.locator("#content-multiply-divide")).to_be_visible()
 
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            # Take a screenshot on failure
-            await page.screenshot(path="jules-scratch/verification/error.png")
+        # Click the "Timed Test" button and verify it navigates to the game page.
+        await page.click("#start-test-multiply-divide")
+        await expect(page.locator("#game-page")).to_be_visible()
+        await expect(page.locator("#game-title")).to_have_text("Multiply/Divide Test")
 
         # --- Test 2: Reward menu back button ---
         # Manually show the reward menu page to test its back button.
