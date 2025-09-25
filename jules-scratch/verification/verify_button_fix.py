@@ -22,12 +22,26 @@ async def main():
         await expect(page.locator("#game-title")).to_have_text("Multiply/Divide Test")
 
         # --- Test 2: Reward menu back button ---
-        # Manually show the reward menu page to test its back button.
-        await page.evaluate("showPage('reward-menu-page')")
-        await expect(page.locator("#reward-menu-page")).to_be_visible()
+        # Manually set state and end the current test to get to the results page
+        await page.evaluate("""
+            state = {
+                gameMode: 'multiply-divide',
+                type: 'test',
+                questions: [],
+                currentQuestionIndex: 0,
+                correctAnswers: 20,
+                startTime: Date.now()
+            };
+            endTest();
+        """)
+        await expect(page.locator("#results-page")).to_be_visible()
+
+        # Click the reward button
+        await page.click("#reward-game-btn")
+        await expect(page.locator("#reward-game-page")).to_be_visible()
 
         # Click the "Back to Main Menu" button.
-        await page.locator("#reward-menu-page footer button").click()
+        await page.locator("#reward-game-page footer button").click()
 
         # Verify it navigates back to the home page.
         await expect(page.locator("#home-page")).to_be_visible()

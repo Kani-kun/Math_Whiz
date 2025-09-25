@@ -45,20 +45,20 @@
             </header>
             
             <div class="flex justify-center rounded-lg bg-gray-200 p-1 mb-6">
-                <button id="tab-add-subtract" class="tab-btn w-1/2 p-2 rounded-md font-semibold">Addition & Subtraction</button>
-                <button id="tab-multiply-divide" class="tab-btn w-1/2 p-2 rounded-md font-semibold">Multiplication & Division</button>
+                <button id="tab-add-subtract" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('add-subtract')">Addition & Subtraction</button>
+                <button id="tab-multiply-divide" class="tab-btn w-1/2 p-2 rounded-md font-semibold" onclick="switchGameMode('multiply-divide')">Multiplication & Division</button>
             </div>
             
             <div id="content-add-subtract" class="tab-content">
                 <div class="flex flex-col space-y-4">
-                    <button id="start-practice-add-subtract" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
-                    <button id="start-test-add-subtract" class="w-full p-4 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 border-b-4 border-purple-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                    <button onclick="startPractice('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button onclick="startTest('add-subtract')" class="w-full p-4 text-xl font-bold text-white bg-purple-500 rounded-lg shadow-md hover:bg-purple-600 border-b-4 border-purple-700 transition-transform hover:scale-105">🏆 Timed Test</button>
                 </div>
             </div>
             <div id="content-multiply-divide" class="tab-content">
                 <div class="flex flex-col space-y-4">
-                    <button id="start-practice-multiply-divide" class="w-full p-4 text-xl font-bold text-white bg-emerald-500 rounded-lg shadow-md hover:bg-emerald-600 border-b-4 border-emerald-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
-                    <button id="start-test-multiply-divide" class="w-full p-4 text-xl font-bold text-white bg-rose-500 rounded-lg shadow-md hover:bg-rose-600 border-b-4 border-rose-700 transition-transform hover:scale-105">🏆 Timed Test</button>
+                    <button onclick="startPractice('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-emerald-500 rounded-lg shadow-md hover:bg-emerald-600 border-b-4 border-emerald-700 transition-transform hover:scale-105">🧠 Practice Mode</button>
+                    <button onclick="startTest('multiply-divide')" class="w-full p-4 text-xl font-bold text-white bg-rose-500 rounded-lg shadow-md hover:bg-rose-600 border-b-4 border-rose-700 transition-transform hover:scale-105">🏆 Timed Test</button>
                 </div>
             </div>
 
@@ -130,56 +130,6 @@
             </footer>
         </div>
 
-        <!-- Page: Reward Game Menu -->
-        <div id="reward-menu-page" class="page">
-            <header class="text-center mb-6">
-                <h1 class="font-brand text-5xl text-amber-500">Choose Your Reward!</h1>
-                <p class="text-gray-500 mt-2">Pick a game to play</p>
-            </header>
-            <div class="flex flex-col space-y-4">
-                <button onclick="startRewardGame()" class="w-full p-4 text-xl font-bold text-white bg-amber-500 rounded-lg shadow-md hover:bg-amber-600 border-b-4 border-amber-700 transition-transform hover:scale-105">🐦 Flappy Reward</button>
-                <button onclick="startSnakeGame()" class="w-full p-4 text-xl font-bold text-white bg-green-500 rounded-lg shadow-md hover:bg-green-600 border-b-4 border-green-700 transition-transform hover:scale-105">🐍 Classic Snake</button>
-                <button onclick="startRunGame()" class="w-full p-4 text-xl font-bold text-white bg-cyan-500 rounded-lg shadow-md hover:bg-cyan-600 border-b-4 border-cyan-700 transition-transform hover:scale-105">🏃 Adventure Run</button>
-            </div>
-            <footer class="mt-6 text-center">
-                <button onclick="showPage('home-page')" class="text-gray-500 hover:text-blue-600 font-semibold">&larr; Back to Main Menu</button>
-            </footer>
-        </div>
-
-        <!-- Page: Adventure Run Game -->
-        <div id="run-game-page" class="page">
-            <header class="text-center mb-4">
-                <h1 class="font-brand text-4xl text-cyan-500">Adventure Run!</h1>
-                <p class="text-gray-500">Spacebar or Click to Jump</p>
-            </header>
-            <div id="run-game-container" class="relative w-full h-96 bg-gray-200 overflow-hidden rounded-lg shadow-lg border-4 border-gray-700">
-                <canvas id="run-game-canvas"></canvas>
-                <div class="absolute top-4 right-4 text-gray-800 text-3xl font-bold" id="run-score">Score: 0</div>
-                <div id="run-start-message" class="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold text-center p-4" style="background-color: rgba(0,0,0,0.5); text-shadow: 2px 2px 4px #000;">Click to Start!</div>
-            </div>
-             <footer class="mt-6 text-center">
-                <button onclick="showPage('reward-menu-page')" class="text-gray-500 hover:text-blue-600 font-semibold">&larr; Back to Game Menu</button>
-            </footer>
-        </div>
-
-        <!-- Page: Snake Game -->
-        <div id="snake-game-page" class="page">
-            <header class="text-center mb-4">
-                <h1 class="font-brand text-4xl text-green-500">Classic Snake!</h1>
-                <p class="text-gray-500">Use Arrow Keys to Move</p>
-            </header>
-            <div id="snake-game-container" class="relative w-full h-96 bg-gray-800 overflow-hidden rounded-lg shadow-lg border-4 border-gray-700">
-                <canvas id="snake-game-canvas"></canvas>
-                <div class="absolute top-4 w-full flex justify-between px-4 text-white text-3xl font-bold" style="text-shadow: 2px 2px 4px #000;">
-                    <div id="snake-score">Score: 0</div>
-                    <div id="snake-high-score">High Score: 0</div>
-                </div>
-                <div id="snake-start-message" class="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold text-center p-4" style="background-color: rgba(0,0,0,0.7); text-shadow: 2px 2px 4px #000;">Press any Arrow Key to Start!</div>
-            </div>
-             <footer class="mt-6 text-center">
-                <button onclick="showPage('reward-menu-page')" class="text-gray-500 hover:text-blue-600 font-semibold">&larr; Back to Game Menu</button>
-            </footer>
-        </div>
     </div>
 
     <!-- Visual Explanation Modal -->
@@ -208,15 +158,6 @@
         const flappyScoreDisplay = document.getElementById('flappy-score');
         const flappyLivesDisplay = document.getElementById('flappy-lives');
         const flappyStartMessage = document.getElementById('flappy-start-message');
-        const snakeGameCanvas = document.getElementById('snake-game-canvas');
-        const snakeGameContainer = document.getElementById('snake-game-container');
-        const snakeScoreDisplay = document.getElementById('snake-score');
-        const snakeHighScoreDisplay = document.getElementById('snake-high-score');
-        const snakeStartMessage = document.getElementById('snake-start-message');
-        const runGameCanvas = document.getElementById('run-game-canvas');
-        const runGameContainer = document.getElementById('run-game-container');
-        const runScoreDisplay = document.getElementById('run-score');
-        const runStartMessage = document.getElementById('run-start-message');
 
         // --- Game State ---
         let state = {};
@@ -756,328 +697,17 @@
             }
         }
 
-        // --- Snake Game ---
-        let snake, food, snakeScore, snakeHighScore, snakeDirection, snakeGameLoop, snakeGameActive, changingDirection;
-        const gridSize = 20;
-
-        function setupSnakeGame() {
-            const canvas = snakeGameCanvas;
-            const container = snakeGameContainer;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            const ctx = canvas.getContext('2d');
-
-            snake = [{ x: 8 * gridSize, y: 8 * gridSize }];
-            snakeScore = 0;
-            snakeHighScore = localStorage.getItem('snakeHighScore') || 0;
-            snakeDirection = { x: gridSize, y: 0 };
-            snakeGameActive = false;
-            changingDirection = false;
-
-            snakeScoreDisplay.textContent = `Score: ${snakeScore}`;
-            snakeHighScoreDisplay.textContent = `High Score: ${snakeHighScore}`;
-            snakeStartMessage.style.display = 'flex';
-
-            if (snakeGameLoop) clearInterval(snakeGameLoop);
-
-            createFood();
-            drawSnakeGame(ctx, canvas);
-        }
-
-        function startSnakeGame() {
-            showPage('snake-game-page');
-            setupSnakeGame();
-            document.addEventListener('keydown', changeDirection);
-        }
-
-        function runSnakeGame() {
-            if (!snakeGameActive) return;
-
-            const canvas = snakeGameCanvas;
-            const ctx = canvas.getContext('2d');
-
-            changingDirection = false;
-
-            const head = { x: snake[0].x + snakeDirection.x, y: snake[0].y + snakeDirection.y };
-            snake.unshift(head);
-
-            if (head.x === food.x && head.y === food.y) {
-                snakeScore += 10;
-                snakeScoreDisplay.textContent = `Score: ${snakeScore}`;
-                createFood();
-            } else {
-                snake.pop();
-            }
-
-            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || hasSelfCollision()) {
-                endSnakeGame();
-                return;
-            }
-
-            drawSnakeGame(ctx, canvas);
-        }
-
-        function drawSnakeGame(ctx, canvas) {
-            ctx.fillStyle = '#2d3748';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            snake.forEach(part => {
-                ctx.fillStyle = part === snake[0] ? '#38A169' : '#48BB78';
-                ctx.fillRect(part.x, part.y, gridSize, gridSize);
-                ctx.strokeStyle = '#2d3748';
-                ctx.strokeRect(part.x, part.y, gridSize, gridSize);
-            });
-
-            ctx.fillStyle = '#F56565';
-            ctx.fillRect(food.x, food.y, gridSize, gridSize);
-        }
-
-        function createFood() {
-            const canvas = snakeGameCanvas;
-            food = {
-                x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
-                y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize
-            };
-            snake.forEach(part => {
-                if (part.x === food.x && part.y === food.y) {
-                    createFood();
-                }
-            });
-        }
-
-        function hasSelfCollision() {
-            for (let i = 4; i < snake.length; i++) {
-                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function changeDirection(e) {
-            if (changingDirection) return;
-            changingDirection = true;
-
-            const keyPressed = e.key;
-            const goingUp = snakeDirection.y === -gridSize;
-            const goingDown = snakeDirection.y === gridSize;
-            const goingRight = snakeDirection.x === gridSize;
-            const goingLeft = snakeDirection.x === -gridSize;
-
-            if (!snakeGameActive && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(keyPressed)) {
-                snakeGameActive = true;
-                snakeStartMessage.style.display = 'none';
-                snakeGameLoop = setInterval(runSnakeGame, 100);
-            }
-
-            if (keyPressed === 'ArrowLeft' && !goingRight) { snakeDirection = { x: -gridSize, y: 0 }; }
-            if (keyPressed === 'ArrowUp' && !goingDown) { snakeDirection = { x: 0, y: -gridSize }; }
-            if (keyPressed === 'ArrowRight' && !goingLeft) { snakeDirection = { x: gridSize, y: 0 }; }
-            if (keyPressed === 'ArrowDown' && !goingUp) { snakeDirection = { x: 0, y: gridSize }; }
-        }
-
-        function endSnakeGame() {
-            snakeGameActive = false;
-            clearInterval(snakeGameLoop);
-            document.removeEventListener('keydown', changeDirection);
-
-            if (snakeScore > snakeHighScore) {
-                snakeHighScore = snakeScore;
-                localStorage.setItem('snakeHighScore', snakeHighScore);
-            }
-
-            snakeStartMessage.innerHTML = `Game Over!<br>Score: ${snakeScore}<br>High Score: ${snakeHighScore}<br><small>Click to return to menu</small>`;
-            snakeStartMessage.style.display = 'flex';
-
-            const returnHandler = () => {
-                showPage('reward-menu-page');
-                snakeStartMessage.removeEventListener('click', returnHandler);
-            };
-            snakeStartMessage.addEventListener('click', returnHandler, { once: true });
-        }
-        // --- Adventure Run Game ---
-        let player, obstacles, runScore, runHighScore, runGameSpeed, runGameLoop, runGameActive;
-        const playerWidth = 30;
-        const playerHeight = 50;
-        const groundHeight = 50;
-
-        function setupRunGame() {
-            const canvas = runGameCanvas;
-            const container = runGameContainer;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-            const ctx = canvas.getContext('2d');
-
-            player = {
-                x: 50,
-                y: canvas.height - groundHeight - playerHeight,
-                width: playerWidth,
-                height: playerHeight,
-                velocityY: 0,
-                isJumping: false
-            };
-
-            obstacles = [];
-            runScore = 0;
-            runHighScore = localStorage.getItem('runHighScore') || 0;
-            runGameSpeed = 5;
-            runGameActive = false;
-
-            runScoreDisplay.textContent = `Score: ${runScore}`;
-            runStartMessage.style.display = 'flex';
-
-            if (runGameLoop) cancelAnimationFrame(runGameLoop);
-
-            drawRunGame(ctx, canvas);
-        }
-
-        function startRunGame() {
-            showPage('run-game-page');
-            setupRunGame();
-            document.addEventListener('keydown', handleRunInput);
-            runGameContainer.addEventListener('click', handleRunInput);
-        }
-
-        function runGameLoop() {
-            const canvas = runGameCanvas;
-            const ctx = canvas.getContext('2d');
-
-            if (!runGameActive) return;
-
-            // Update player
-            if (player.isJumping) {
-                player.velocityY += 1; // Gravity
-                player.y += player.velocityY;
-
-                if (player.y >= canvas.height - groundHeight - playerHeight) {
-                    player.y = canvas.height - groundHeight - playerHeight;
-                    player.isJumping = false;
-                    player.velocityY = 0;
-                }
-            }
-
-            // Update obstacles
-            if (Math.random() < 0.015 && obstacles.length < 3) {
-                obstacles.push({
-                    x: canvas.width,
-                    width: 20 + Math.random() * 30,
-                    height: 30 + Math.random() * 40
-                });
-            }
-
-            obstacles.forEach(obs => {
-                obs.x -= runGameSpeed;
-            });
-
-            obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
-
-            let collision = false;
-            obstacles.forEach(obs => {
-                if (
-                    player.x < obs.x + obs.width &&
-                    player.x + player.width > obs.x &&
-                    player.y + player.height > canvas.height - groundHeight - obs.height
-                ) {
-                    collision = true;
-                }
-            });
-
-            if(collision) {
-                endRunGame();
-                return;
-            }
-
-            // Update score and speed
-            runScore++;
-            runScoreDisplay.textContent = `Score: ${runScore}`;
-            if (runScore > 0 && runScore % 100 === 0) {
-                runGameSpeed += 0.2;
-            }
-
-            drawRunGame(ctx, canvas);
-
-            runGameLoop = requestAnimationFrame(runGameLoop);
-        }
-
-        function drawRunGame(ctx, canvas) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw ground
-            ctx.fillStyle = '#A0AEC0'; // Gray ground
-            ctx.fillRect(0, canvas.height - groundHeight, canvas.width, groundHeight);
-
-            // Draw player
-            ctx.fillStyle = '#4299E1';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-
-            // Draw obstacles
-            ctx.fillStyle = '#C53030';
-            obstacles.forEach(obs => {
-                ctx.fillRect(obs.x, canvas.height - groundHeight - obs.height, obs.width, obs.height);
-            });
-        }
-
-        function handleRunInput(e) {
-            if (e.type === 'click' || (e.type === 'keydown' && e.code === 'Space')) {
-                if (e.type === 'keydown') e.preventDefault();
-
-                if (!runGameActive) {
-                    runGameActive = true;
-                    runStartMessage.style.display = 'none';
-                    runGameLoop = requestAnimationFrame(runGameLoop);
-                }
-
-                if (!player.isJumping) {
-                    player.isJumping = true;
-                    player.velocityY = -20;
-                }
-            }
-        }
-
-        function endRunGame() {
-            runGameActive = false;
-            cancelAnimationFrame(runGameLoop);
-            document.removeEventListener('keydown', handleRunInput);
-            runGameContainer.removeEventListener('click', handleRunInput);
-
-            if (runScore > runHighScore) {
-                runHighScore = runScore;
-                localStorage.setItem('runHighScore', runHighScore);
-            }
-
-            runStartMessage.innerHTML = `Game Over!<br>Score: ${runScore}<br>High Score: ${runHighScore}<br><small>Click to return to menu</small>`;
-            runStartMessage.style.display = 'flex';
-
-            const returnHandler = () => {
-                showPage('reward-menu-page');
-                runStartMessage.removeEventListener('click', returnHandler);
-            };
-            runStartMessage.addEventListener('click', returnHandler, { once: true });
-        }
 
         // --- Initial Load ---
         window.onload = () => {
             switchGameMode('add-subtract');
             showPage('home-page');
-
-            // Home page event listeners
-            document.getElementById('tab-add-subtract').addEventListener('click', () => switchGameMode('add-subtract'));
-            document.getElementById('tab-multiply-divide').addEventListener('click', () => switchGameMode('multiply-divide'));
-            document.getElementById('start-practice-add-subtract').addEventListener('click', () => startPractice('add-subtract'));
-            document.getElementById('start-test-add-subtract').addEventListener('click', () => startTest('add-subtract'));
-            document.getElementById('start-practice-multiply-divide').addEventListener('click', () => startPractice('multiply-divide'));
-            document.getElementById('start-test-multiply-divide').addEventListener('click', () => startTest('multiply-divide'));
-
             hardModeToggle.addEventListener('change', (e) => {
                 isHardMode = e.target.checked;
             });
-
-            // Modal listeners
             modalCloseBtn.onclick = hideVisualExplanation;
             visualModal.onclick = (e) => { if (e.target === visualModal) hideVisualExplanation(); };
-
-            // Reward listeners
-            rewardGameBtn.onclick = () => showPage('reward-menu-page');
+            rewardGameBtn.onclick = startRewardGame;
         };
     </script>
 </body>
