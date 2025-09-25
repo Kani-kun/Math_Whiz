@@ -104,11 +104,32 @@
                 <div class="flex justify-between items-center"><span class="font-semibold text-green-800">⏱️ Time Taken:</span><span id="results-time" class="font-bold text-2xl text-green-700"></span></div>
                 <div class="flex justify-between items-center"><span class="font-semibold text-green-800">🎯 Correct Answers:</span><span id="results-score" class="font-bold text-2xl text-green-700"></span></div>
             </div>
+            <div id="reward-game-container" class="mt-6">
+                <button id="reward-game-btn" class="w-full p-4 text-xl font-bold text-white bg-amber-500 rounded-lg shadow-md hover:bg-amber-600 border-b-4 border-amber-700 transition-transform hover:scale-105" style="display: none;">🎉 Play Reward Game! 🎉</button>
+            </div>
             <div class="mt-8 flex flex-col space-y-4">
                 <button id="results-retry-btn" class="w-full p-4 text-xl font-bold text-white rounded-lg shadow-md border-b-4 transition-transform hover:scale-105">Try Again</button>
                 <button onclick="showPage('home-page')" class="w-full p-4 text-xl font-bold text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 border-b-4 border-blue-700 transition-transform hover:scale-105">Main Menu</button>
             </div>
         </div>
+
+        <!-- Page: Reward Game -->
+        <div id="reward-game-page" class="page">
+            <header class="text-center mb-4">
+                <h1 class="font-brand text-4xl text-amber-500">Flappy Reward!</h1>
+                <p class="text-gray-500">Click or Tap to Fly!</p>
+            </header>
+            <div id="flappy-game-container" class="relative w-full h-96 bg-cyan-400 overflow-hidden rounded-lg shadow-lg border-4 border-gray-700">
+                <canvas id="reward-game-canvas"></canvas>
+                <div id="flappy-lives" class="absolute top-4 left-4 text-white text-3xl font-bold" style="text-shadow: 2px 2px 4px #000;"></div>
+                <div id="flappy-score" class="absolute top-4 right-4 text-white text-3xl font-bold" style="text-shadow: 2px 2px 4px #000;">0</div>
+                <div id="flappy-start-message" class="absolute inset-0 flex items-center justify-center text-white text-2xl font-bold text-center p-4" style="background-color: rgba(0,0,0,0.5); text-shadow: 2px 2px 4px #000;">Click to Start!</div>
+            </div>
+             <footer class="mt-6 text-center">
+                <button onclick="showPage('home-page')" class="text-gray-500 hover:text-blue-600 font-semibold">&larr; Back to Menu</button>
+            </footer>
+        </div>
+
     </div>
 
     <!-- Visual Explanation Modal -->
@@ -131,6 +152,12 @@
         const resultsAccuracy = document.getElementById('results-accuracy'), resultsTime = document.getElementById('results-time'), resultsScore = document.getElementById('results-score'), resultsRetryBtn = document.getElementById('results-retry-btn');
         const visualModal = document.getElementById('visual-modal'), modalProblemText = document.getElementById('modal-problem-text'), modalExplanationText = document.getElementById('modal-explanation-text'), visualCanvas = document.getElementById('visual-canvas'), modalCloseBtn = document.getElementById('modal-close-btn');
         const hardModeToggle = document.getElementById('hard-mode-toggle');
+        const rewardGameBtn = document.getElementById('reward-game-btn');
+        const rewardGameCanvas = document.getElementById('reward-game-canvas');
+        const flappyGameContainer = document.getElementById('flappy-game-container');
+        const flappyScoreDisplay = document.getElementById('flappy-score');
+        const flappyLivesDisplay = document.getElementById('flappy-lives');
+        const flappyStartMessage = document.getElementById('flappy-start-message');
 
         // --- Game State ---
         let state = {};
@@ -317,6 +344,17 @@
             resultsTime.textContent = `${timeTaken} seconds`;
             resultsScore.textContent = `${state.correctAnswers} / ${TOTAL_TEST_QUESTIONS}`;
             
+            // Reward Logic
+            if (accuracy >= 80) {
+                state.rewardPlayed = false; // Reset reward state
+                rewardGameBtn.style.display = 'block';
+                rewardGameBtn.disabled = false;
+                rewardGameBtn.textContent = '🎉 Play Reward Game! 🎉';
+                rewardGameBtn.style.opacity = '1';
+            } else {
+                rewardGameBtn.style.display = 'none';
+            }
+
             const isAddSub = state.gameMode === 'add-subtract';
             resultsRetryBtn.className = `w-full p-4 text-xl font-bold text-white rounded-lg shadow-md border-b-4 transition-transform hover:scale-105 ${isAddSub ? 'bg-purple-500 hover:bg-purple-600 border-purple-700' : 'bg-rose-500 hover:bg-rose-600 border-rose-700'}`;
             resultsRetryBtn.onclick = () => startTest(state.gameMode);
@@ -451,6 +489,215 @@
             }
         }
 
+        // --- Flappy Reward Game ---
+        let bird, pipes, flappyScore, flappyLives, gravity, lift, gameLoop, gameActive, frameCount;
+
+        function setupFlappyGame() {
+            const canvas = rewardGameCanvas;
+            const container = flappyGameContainer;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            const ctx = canvas.getContext('2d');
+
+            bird = {
+                x: 50,
+                y: canvas.height / 2,
+                radius: 15,
+                velocity: 0,
+                color: '#FFC107'
+            };
+
+            pipes = [];
+            flappyScore = 0;
+            flappyLives = 3;
+            gravity = 0.4;
+            lift = -8;
+            gameActive = false;
+            frameCount = 0;
+
+            flappyScoreDisplay.textContent = flappyScore;
+            flappyLivesDisplay.textContent = `❤️❤️❤️`;
+            flappyStartMessage.innerHTML = 'Click to Start!';
+            flappyStartMessage.style.display = 'flex';
+
+            if (gameLoop) cancelAnimationFrame(gameLoop);
+
+            drawFlappy(ctx, canvas);
+
+            // Add input listeners for starting the game
+            flappyGameContainer.addEventListener('click', handleFlappyInput);
+            document.addEventListener('keydown', handleFlappyInput);
+        }
+
+        function startRewardGame() {
+            if(state.rewardPlayed) return;
+            showPage('reward-game-page');
+            setupFlappyGame();
+        }
+
+        function runFlappyGame() {
+            const canvas = rewardGameCanvas;
+            const ctx = canvas.getContext('2d');
+
+            // Update
+            bird.velocity += gravity;
+            bird.y += bird.velocity;
+
+            // Collision detection (canvas bounds)
+            if (bird.y + bird.radius > canvas.height || bird.y - bird.radius < 0) {
+                handleCollision();
+                return;
+            }
+
+            // Pipe management
+            if (frameCount % 90 === 0) {
+                const pipeGap = 150;
+                const pipeWidth = 60;
+                const topHeight = Math.random() * (canvas.height - pipeGap - 100) + 50;
+                pipes.push({
+                    x: canvas.width,
+                    topHeight: topHeight,
+                    bottomY: topHeight + pipeGap,
+                    width: pipeWidth,
+                    passed: false
+                });
+            }
+
+            let collision = false;
+            pipes.forEach(pipe => {
+                pipe.x -= 3;
+
+                if (bird.x + bird.radius > pipe.x && bird.x - bird.radius < pipe.x + pipe.width) {
+                    if (bird.y - bird.radius < pipe.topHeight || bird.y + bird.radius > pipe.bottomY) {
+                        collision = true;
+                    }
+                }
+
+                if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+                    pipe.passed = true;
+                    flappyScore++;
+                    flappyScoreDisplay.textContent = flappyScore;
+                }
+            });
+
+            if (collision) {
+                handleCollision();
+                return;
+            }
+
+            pipes = pipes.filter(pipe => pipe.x + pipe.width > 0);
+
+            drawFlappy(ctx, canvas);
+
+            if (gameActive) {
+                frameCount++;
+                gameLoop = requestAnimationFrame(runFlappyGame);
+            }
+        }
+
+        function handleCollision() {
+            gameActive = false; // Pause the game
+            cancelAnimationFrame(gameLoop);
+
+            flappyLives--;
+
+            const hearts = Array(flappyLives).fill('❤️').join('');
+            flappyLivesDisplay.textContent = hearts;
+
+            if (flappyLives <= 0) {
+                endFlappyGame();
+            } else {
+                // Reset bird and show a message
+                bird.y = rewardGameCanvas.height / 2;
+                bird.velocity = 0;
+                drawFlappy(rewardGameCanvas.getContext('2d'), rewardGameCanvas); // Redraw to show reset bird
+
+                flappyStartMessage.innerHTML = `${flappyLives} ${flappyLives > 1 ? 'lives' : 'life'} left!<br><small>Click to continue</small>`;
+                flappyStartMessage.style.display = 'flex';
+
+                // Allow player to click to resume
+                const continueHandler = () => {
+                    if (!gameActive) {
+                       gameActive = true;
+                       flappyStartMessage.style.display = 'none';
+                       gameLoop = requestAnimationFrame(runFlappyGame);
+                       flappyGameContainer.removeEventListener('click', continueHandler);
+                    }
+                };
+                flappyGameContainer.addEventListener('click', continueHandler, { once: true });
+            }
+        }
+
+        function drawFlappy(ctx, canvas) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw pipes first
+            ctx.fillStyle = '#2E7D32';
+            pipes.forEach(pipe => {
+                ctx.fillRect(pipe.x, 0, pipe.width, pipe.topHeight);
+                ctx.fillRect(pipe.x, pipe.bottomY, pipe.width, canvas.height - pipe.bottomY);
+            });
+
+            // Draw bird
+            ctx.fillStyle = bird.color;
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw bird eye
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(bird.x + 5, bird.y - 5, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(bird.x + 7, bird.y - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function endFlappyGame() {
+            state.rewardPlayed = true;
+
+            // High Score Logic
+            let highScore = localStorage.getItem('flappyHighScore') || 0;
+            if (flappyScore > highScore) {
+                highScore = flappyScore;
+                localStorage.setItem('flappyHighScore', highScore);
+            }
+
+            flappyStartMessage.innerHTML = `Game Over!<br>Score: ${flappyScore}<br>High Score: ${highScore}<br><small>Click to go back</small>`;
+            flappyStartMessage.style.display = 'flex';
+
+            rewardGameBtn.disabled = true;
+            rewardGameBtn.textContent = 'Reward Played!';
+            rewardGameBtn.style.opacity = '0.7';
+
+            flappyGameContainer.removeEventListener('click', handleFlappyInput);
+            document.removeEventListener('keydown', handleFlappyInput);
+
+            const returnHandler = () => {
+                showPage('results-page');
+                flappyStartMessage.removeEventListener('click', returnHandler);
+            };
+            flappyStartMessage.addEventListener('click', returnHandler, { once: true });
+        }
+
+        function handleFlappyInput(e) {
+            if (e.type === 'click' || (e.type === 'keydown' && e.code === 'Space')) {
+                if (e.type === 'keydown') e.preventDefault();
+
+                if (!gameActive) {
+                    gameActive = true;
+                    bird.velocity = lift;
+                    flappyStartMessage.style.display = 'none';
+                    gameLoop = requestAnimationFrame(runFlappyGame);
+                } else {
+                    bird.velocity = lift;
+                }
+            }
+        }
+
+
         // --- Initial Load ---
         window.onload = () => {
             switchGameMode('add-subtract');
@@ -460,6 +707,7 @@
             });
             modalCloseBtn.onclick = hideVisualExplanation;
             visualModal.onclick = (e) => { if (e.target === visualModal) hideVisualExplanation(); };
+            rewardGameBtn.onclick = startRewardGame;
         };
     </script>
 </body>
